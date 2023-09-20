@@ -6,7 +6,7 @@
 /*   By: ayael-ou <ayael-ou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/29 19:33:07 by kbouzegh          #+#    #+#             */
-/*   Updated: 2023/09/06 12:03:21 by ayael-ou         ###   ########.fr       */
+/*   Updated: 2023/09/13 03:16:43 by ayael-ou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,18 +67,24 @@ int	size_of_cmd(char **env)
 	return (i);
 }
 
-void	create_every_files(char **files)
+void	create_every_files(t_pipex *pipex)
 {
 	int		fd_files;
 	int		i;
+	int		j;
 
-	if (files == NULL)
-		return ;
 	i = 0;
-	while (files[i])
+	if (!pipex[0].nboutfiles)
+		return ;
+	while (i < pipex[0].size)
 	{
-		fd_files = open(files[i], O_CREAT | O_TRUNC, 0666);
-		close(fd_files);
+		j = 0;
+		while (pipex[i].outfiles[j] && pipex[i].outfiles[j] != NULL)
+		{
+			fd_files = open(pipex[i].outfiles[j], O_CREAT | O_TRUNC, 0666);
+			close(fd_files);
+			j++;
+		}
 		i++;
 	}
 }

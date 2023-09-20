@@ -6,7 +6,7 @@
 /*   By: ayael-ou <ayael-ou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/10 21:56:25 by ayael-ou          #+#    #+#             */
-/*   Updated: 2023/09/10 04:30:20 by ayael-ou         ###   ########.fr       */
+/*   Updated: 2023/09/20 18:18:28 by ayael-ou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -92,6 +92,10 @@ typedef struct s_pipex
 	char **env;       // stock environement
 	char **fake_env;  // env export solo
 	char *cmd;        // cmd avec ces argument ecrire avec seulement un espace
+	char	**infiles;
+	char	**outfiles;
+	int		nbinfiles;
+	int		nboutfiles;
 	int export_cmd;   // if cmd == export
 	int dollar;       // i on detecte $? ou $(variable)
 	int size;         // size of cmd
@@ -107,9 +111,12 @@ typedef struct s_pipex
 	int echo_n;       // si on détécte on option -n mettre 1 et 1 echo
 	int here_doc;     // si on detecte here_doc
 	int		index_char;
+	int		indexmot;
 	int		erreur;
 	int		sq;
 	int		dq;
+	char	*commande;
+	int	aya;
 }			t_pipex;
 
 extern int ctrl_c_signo;
@@ -134,9 +141,9 @@ void		signal_ctrl_slash(int signo);
 void		signal_ctrl_d(void);
 void		signal_ctrl_c(int signo);
 /*-------------------------------EXEC/REDIRECTION---------------------------------*/
-void		exec_cmd(t_pipex *pipex, t_cmd data, char **env, int boolean);
+void		exec_cmd(t_pipex *pipex, t_cmd data, char *pwd, int boolean);
 void		is_child(t_cmd *data, const int index, t_pipex *pipex);
-void		child_process(t_cmd data, char **env, t_pipex *pipex);
+void		child_process(t_cmd data, t_pipex *pipex, int status, char *pwd);
 void		write_file(t_cmd data, char *outfile, int append);
 void		edit_env(char **str, t_pipex *pipex);
 void		readfile(t_cmd data, char *infile);
@@ -145,22 +152,35 @@ void		free_data(char **option);
 void		free_dataa(t_cmd *data);
 char		**split_cmd(char *av);
 char		**export_fake_env(char **env);
+char    	*ft_strcpy_mall(char *src);
 char		*get_next_line(int fd, t_cmd *data, int boolean);
+char		*add2write(char *dest, char *str3, char *str4, int j);
 int			error_syntaxe(t_pipex *pipex);
 void		initdata(t_cmd *data, int nbcm);
 void		create_nino(char **env, char **option);
+char		*right_directory(char *str);
 int			end_function(t_cmd data, t_pipex *pipex);
 void		print_pipex(t_pipex *pipex);
+char		*new_str_special(char *src);
 char    	**double_cut(char *str);
+void		init_cmd(t_pipex *pipex, char *commande);
+char		*replace_echo(t_pipex *pipex, int status, char *new);
+void		end_function_cmd(char **new_str, t_pipex *pipex, char *str);
+void		end_function_str_path(char **new_str, t_pipex *pipex, char *str);
+void		end_function_path(char **new_str, t_pipex *pipex, char *str);
+void		end_function_limiteur(char **new_str, t_pipex *pipex, char *str);
+void		end_function_files_in(char **new_str, t_pipex *pipex, char *str);
+void		end_function_files_out(char **new_str, t_pipex *pipex, char *str);
+
 char    	*ft_replace_status(int status, char *str);
 void		redirect_of_man(t_cmd *data, t_pipex *pipex);
-void		create_here_doc(char *infile, char *limiter, t_pipex *pipex, int sta);
-void		create_every_files(char **files);
+void		create_here_doc(t_pipex *pipex, t_cmd *data,  int *tab, char *pwd);
+void		create_every_files(t_pipex *pipex);
 // void		create_here_doc(char *infile, char *limiter, t_cmd *data);
-void		create_path(t_pipex *pipex, t_cmd data, char **env, char **option);
+void		create_path(t_pipex *pipex, t_cmd data, char *pwd, char **option);
 int			ft_strncmp_here(char *s1, char *s2, size_t n, int nb);
-int			second_pipex(t_cmd data, t_pipex *pipex, char **env, int sta);
-int			pipex_main(char **env, t_pipex *pipex, int status);
+int			second_pipex(t_cmd data, t_pipex *pipex, int sta, char *pwd);
+int			pipex_main(char **env, t_pipex *pipex, int status, char *pwd);
 char		**ft_strcpy_double(char **env_copy);
 int			valid_print(char *str);
 
@@ -192,18 +212,31 @@ char		*get_directory(char *pwd);
 int			size_of_env(char **env);
 char		*replace_str(char *cmd);
 void		init_fake_env(t_pipex *pipex, char **env);
-char		*print_directory(void);
+char		*print_directory(char **new_str, char *pwd);
 int			cmd_env(char **env);
 int			cmd_pwd(void);
+int			find_end_path(char *str);
 char		*ft_itoa(int nb);
+char		**add_export(char **env_cpy);
 char		*replace_every(char *str, int status, t_pipex *pipex);
 char		*replace_str_here(char *src, int status, t_pipex *pipex);
 int			size_path(char *str);
-int			cmd_cd(char *str_path);
+void	signal_ctrl_c_here(int signo);
+//void	signal_ctrl_c_here(t_pipex *pipex, t_cmd *data, int *tab, char *pwd);
+int			cmd_cd(char *str_path, char **new_env);
+char		**replace_export(char **env, int i);
+char	*ft_strcpy_sp(char *dest, char *src);
+void	ft_ctrl_here(char *limiteur);
+void	free_files(char *s1, char *s2, char *s3);
+char	*replace_status_doll(char **next, int status);
+char	*delete_char(char *src);
+char	*replace_no_env(char **next);
+void	delete_here_doc(t_pipex *pipex);
+char	*ft_strjoin_str2(char *s1, char *s2);
 void		add_fake_env(char *str_path, t_pipex *pipex, int place);
-int			cmd_echo(char *msg, int nb);
+int			cmd_echo(char *msg, int nb, int status, t_pipex *pipex);
 void		print_verif(t_pipex *builtins);
-int			choice_of_builtins(t_pipex *built, int i);
+int			choice_of_builtins(t_pipex *built, int i, int status);
 int			cmd_unset(t_pipex *builtins, t_pipex *pipex);
 int			cmd_export(t_pipex *builtins, t_pipex *pipex, int i);
 void		edit_fake_env(char **str, t_pipex *pipex);
@@ -214,106 +247,66 @@ int			find_env(char **env, char *str_path, int place);
 ///////////////////////////////////////////////////////////////
 //////////////////////////// KAMEL ////////////////////////////
 ///////////////////////////////////////////////////////////////
+
 // Builtins
 
-void		checkUnset(t_pipex *pipex, int ip);
-void		checkBuiltins(t_pipex *pipex, int ip);
-void		checkExport(t_pipex *pipex, int ip);
-void		checkCd(t_pipex *pipex, int ip);
-void		checkEcho(t_pipex *pipex, int ip);
-void		checkPwd(t_pipex *pipex, int ip);
+void		checkBuiltins(t_pipex *pipex, int ip, char **motscmd);
+void		checkUnset(t_pipex *pipex, int ip, char **cmd);
+void		checkExport(t_pipex *pipex, int ip, char **cmd);
+void		checkCd(t_pipex *pipex, int ip, char **cmd);
+void		checkEcho(t_pipex *pipex, int ip, char **cmd);
+void		checkPwd(t_pipex *pipex, int ip, char **cmd);
 void		checkEnv(t_pipex *pipex, int ip);
-void		strcpyEchoN(t_pipex *pipex, int ip);
-char		*strcpyOption(t_pipex *pipex, int index_pipe);
-char		*strcpyCd(t_pipex *pipex, int index_pipe);
-char		*strcpyUnset(t_pipex *pipex, int index_pipe);
-char		*strcpyExport(t_pipex *pipex, int index_pipe);
-char		*strcpyEcho(t_pipex *pipex, int index_pipe);
-char		*strcpySpecial(char *src, char deli, t_pipex *pipex, int *tab);
-char		*strcpySpecialSq(char *src, t_pipex *pipex, int *tab);
-char		*strcpySpecialDq(char *src, t_pipex *pipex, int *tab);
 
 // Initialisation & Free
 
 t_pipex		*init_pipex(int parts, char **env);
-void		free_pipex(t_pipex *pipex);
-void		free_tab_pipex(t_pipex *pipex, int parts);
+//void		free_pipex(t_pipex *pipex);
+void		free_pipex_infiles_outfiles_env(t_pipex *pipex, int i);
 void		free_char_double(char **array);
-void		free_double(char **tab);
-
+void		case_command_null(char *pwd, char *commande, char **new_env);
 // Parsing
 
-void		heredocDq(char **p, t_pipex *pi, int ip);
-void		heredocSq(char **p, t_pipex *pi, int ip);
-void		heredocFile(char **p, t_pipex *pi, int ip);
-void		infileHeredoc(char **p, t_pipex *pi, int ip);
 void		parsing(char *commande, t_pipex *pi, char **env);
-void		infileSpaceFile(char **p, t_pipex *pi, int ip);
-void		infileSpaceDq(char **p, t_pipex *pi, int ip);
-void		infileSpaceSq(char **p, t_pipex *pi, int ip);
-void		infileFile(char **p, t_pipex *pi, int ip);
-void		infile(char **p, t_pipex *pi, int ip);
-void		outfileAppend(char **p, t_pipex *pi, int ip);
-void		outfileSpaceFile(char **p, t_pipex *pi, int ip);
-void		outfileSpaceDq(char **p, t_pipex *pi, int ip);
-void		outfileSpaceSq(char **p, t_pipex *pi, int ip);
-void		outfileFile(char **p, t_pipex *pi, int ip);
-void		outfile(char **p, t_pipex *pi, int ip);
-void		stockage_commande(char **p, t_pipex *pi, int ip);
-
-// Utils
 
 // Count
-int			countPipes(char *commande);
-int			count_words(const char *str, char c);
-int			countWordsCd(char *commande);
-int			countSingleQuotes(const char *str);
-int			countDoubleQuotes(const char *str);
-int			countParentheses(const char *str);
-// Contains
-int			containsdollarsign(const char *str);
-int			onlySpaces(char *str);
+
+int			ft_count_files(char c, char *str);
+int			ft_count_words(const char *str, char c);
+int			ft_count_simple_quotes(const char *str);
+int			ft_count_double_quotes(const char *str);
+int			ft_count_parentheses(const char *str);
+int			ft_count_pipes(char *s);
+int			ft_countwords(char *str);
+int			ft_count_dollars(char *str);
+
 // Check
-int			checkInfile(char *commande, int debut);
-int			checkOutfile(char *commande, int debut, t_pipex *pipex, int ip);
-int			checkFileAppend(char *commande, int debut, t_pipex *pipex, int ip);
-int			checkFileHeredoc(char *commande, int debut);
-void		checkExit(t_pipex *pipex, int ip);
+
+int			check_only_spaces(char *str);
+void		check_exit(t_pipex *pipex, int ip, char **cmd);
+int			check_is_even(int num);
+
 // Display
-void		displayPipex(t_pipex *pipex, int parts);
-void		displayPipexEssential(t_pipex *pipex, int parts);
+
+void		display_pipex(t_pipex *pipex, int parts);
+
 //
-void		write_env(t_pipex *pipex, char **env);
-void		spaceManagement(t_pipex *pipex, int ip);
-void		cmdopt(t_pipex *pipex, int ip, char *str, char **p);
-int			nombremots(char *str);
-int			isEven(int num);
+
+void		ft_write_env(t_pipex *pipex, char **env);
 int			ft_strncp(const char *s1, const char *s2);
-int			strncpSpecial(const char *s1, const char *s2, size_t n);
-int			skipFirstSpaces(char *commande);
 size_t		ft_strlen(const char *s);
 char		**ft_split(char const *s, char c);
-char		**write_mots(char *str, int nb);
-char		*append_char(char *str, char c);
 char		*ft_strcpy(char *dest, const char *src);
 char		*wordDup(const char *str, int start, int finish);
+char		*word_dup(const char *str, int start, int finish);
 void		*ft_memcpy(void *dst, const void *src, size_t n);
 char		*ft_strjoin(char const *s1, char const *s2);
 char		*createHeredocFiles(int index);
 char		*ft_strchr(const char *str, int character);
 char		*ft_strncpy(char *dest, const char *src, size_t n);
-char		*extractsubstring(char *str);
-void		*ft_memcpy(void *dst, const void *src, size_t n);
-char		*clear_cmd(char *str);
 void		bzero_pipex(int i, t_pipex *pipex);
-char		*simpleFTdouble(char *str);
-char		*word_dup(const char *str, int start, int finish);
-// Les last
-
-int			countWords(char *str);
 int			*allocWords(char *str);
 char		**words(char *str);
-int			countDollars(char *str);
 char		*convertirDollarEnEuro(char *str);
 void		remplirTableauDeZeros(int *tableau, int taille);
 int			isThereChar(char *str, char c);
@@ -322,8 +315,13 @@ char		*strjoinExtremites(char *str, char c);
 char		*putQuotes(char *str);
 char		**quotes(char *str);
 char		*collerMots(char **mots, int taille);
-
-int			countPipes(char *s);
 char		**splitPipes(char *s);
+char		**decoupage(char *str);
+int			isstartingwith(char *base, char *start);
+int			conditionsquotesimpaires(char **p, int ip);
+void		quotesimpaires(char **p, t_pipex *pipex, int ip);
+char		*concatwithspace(char *str1, char *str2);
 
 #endif
+
+// ls | cat -e | pwd | export kamel=hello aya=coucou | wc -l | exit 12 12 | unset kamel | echo $USER | cat -e

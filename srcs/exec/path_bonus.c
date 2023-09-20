@@ -6,7 +6,7 @@
 /*   By: ayael-ou <ayael-ou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/10 13:26:42 by ayael-ou          #+#    #+#             */
-/*   Updated: 2023/09/10 03:29:51 by ayael-ou         ###   ########.fr       */
+/*   Updated: 2023/09/20 14:50:36 by ayael-ou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,7 +36,15 @@ void	verif_path(char *str, char **env, char **option)
 	return ;
 }
 
-void	create_path(t_pipex *pipex, t_cmd data, char **env, char **option)
+void	free_everythink(char **option, char *dest, t_cmd data, char **str)
+{
+	free_data(str);
+	free(data.pids);
+	free_data(option);
+	free(dest);
+}
+
+void	create_path(t_pipex *pipex, t_cmd data, char *pwd, char **option)
 {
 	char	**str;
 	char	*dest;
@@ -44,26 +52,27 @@ void	create_path(t_pipex *pipex, t_cmd data, char **env, char **option)
 	int		o;
 
 	i = 0;
-	while (env[i])
+	str = NULL;
+	while (pipex->env[i])
 	{
-		if (!ft_strncmp("PATH", env[i], 4))
+		if (!ft_strncmp("PATH", pipex->env[i], 4))
 		{
-			env[i] += 5;
-			str = ft_split(env[i], ':');
+			// env[i] += 5;
+			str = ft_split(pipex->env[i] + 5, ':');
 			o = 0;
 			while (str[o])
-				verif_path(str[o++], env, option);
+				verif_path(str[o++], pipex->env, option);
 		}
 		i++;
 	}
-	dest =  add_write_str("🤡 \033[34m [", option[0], "] \033[31m: Command not found 🤡\n", "");
+	dest = add_write_str("🤡 \033[34m [", option[0],
+			"] \033[31m: Command not found 🤡\n", "");
 	write(STDERR_FILENO, dest, ft_strlen(dest));
-	free(data.pids);
-	free_data(str);
-	free_data(option);
-	free(dest);
-	if (pipex->files[1] || pipex->here_doc)
+	free_everythink(option, dest, data, str);
+	if (pipex->files[1] && pipex->here_doc)
 		unlink(pipex->files[1]);
+	free_pipex(pipex);
+	free(pwd);
 	exit(127);
 }
 

@@ -15,8 +15,8 @@
 char	**restruct(char **str, int place)
 {
 	char	**new_str;
-	int	j;
-	int	i;
+	int		j;
+	int		i;
 
 	i = 0;
 	j = 0;
@@ -25,7 +25,7 @@ char	**restruct(char **str, int place)
 	{
 		if (place == i)
 			i++;
-		else 
+		else
 		{
 			new_str[j] = malloc(sizeof(char) * (ft_strlen(str[i]) + 1));
 			new_str[j] = ft_strcpy(new_str[j], str[i]);
@@ -40,8 +40,8 @@ char	**restruct(char **str, int place)
 void	delete_unset(char **env, char *path, t_pipex *pipex)
 {
 	char	**envi;
-	int	i;
 	char	**tmp;
+	int		i;
 
 	i = 0;
 	while (env[i])
@@ -55,6 +55,7 @@ void	delete_unset(char **env, char *path, t_pipex *pipex)
 	envi = ft_strcpy_double(tmp);
 	free_char_double(tmp);
 	edit_env(envi, pipex);
+	free_char_double(envi);
 }
 
 void	edit_env(char **str, t_pipex *pipex)
@@ -67,7 +68,7 @@ void	edit_env(char **str, t_pipex *pipex)
 		if (pipex[i].env)
 		{
 			free_char_double(pipex[i].env);
-			pipex[i].env = str;
+			pipex[i].env = ft_strcpy_double(str);
 		}
 		i++;
 	}
@@ -80,7 +81,7 @@ int	cmd_unset(t_pipex *builtins, t_pipex *pipex)
 
 	i = 0;
 	if (!builtins->str_path)
-		return(1);
+		return (1);
 	unset_path = ft_split(builtins->str_path, ' ');
 	while (unset_path[i])
 	{

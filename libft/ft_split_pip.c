@@ -65,6 +65,7 @@ char **ft_split_pip(char const *s, char c)
     int index;
     char **split;
     int quote;
+    int s_quote;
     int end;
     int start;
 
@@ -75,11 +76,14 @@ char **ft_split_pip(char const *s, char c)
     j = 0;
     index = -1;
     quote = 0;
+    s_quote = 0;
     while (s[i])
     {
-        if (s[i] == '"')
+        if (s[i] == '"' && !s_quote)
             quote = !quote;
-        else if (s[i] != c || quote)
+        else if (s[i] == '\'' && !quote)
+            s_quote = !s_quote;
+        else if (s[i] != c || quote || s_quote)
         {
             if (index < 0)
                 index = i;

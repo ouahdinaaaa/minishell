@@ -6,17 +6,19 @@
 /*   By: ayael-ou <ayael-ou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/29 19:33:07 by kbouzegh          #+#    #+#             */
-/*   Updated: 2023/07/05 00:37:44 by ayael-ou         ###   ########.fr       */
+/*   Updated: 2023/09/20 14:12:22 by ayael-ou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "minishell.h"
+#include "../../includes/minishell.h"
 
 size_t	ft_strlen(const char *s)
 {
 	size_t	i;
 
 	i = 0;
+	if (!s || s == NULL)
+		return (0);
 	while (s[i] != '\0')
 	{
 		i++;
@@ -24,7 +26,7 @@ size_t	ft_strlen(const char *s)
 	return (i);
 }
 
-int	count_words(const char *str, char c)
+int	ft_count_words(const char *str, char c)
 {
 	int	i;
 	int	j;
@@ -65,7 +67,7 @@ char	**ft_split(char const *s, char c)
 	int		index;
 	char	**split;
 
-	split = malloc((count_words(s, c) + 1) * sizeof(char *));
+	split = malloc((ft_count_words(s, c) + 1) * sizeof(char *));
 	if (!s || !(split))
 		return (0);
 	i = 0;

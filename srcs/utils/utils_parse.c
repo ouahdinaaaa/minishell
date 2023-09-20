@@ -47,16 +47,19 @@ void	free_all_sep(char **env)
 char	**ft_strcpy_double(char **env_copy)
 {
 	char	**str;
-	// int	size;
-	int	i;
+	int		size;
+	int		i;
 
-	// size = size_of_env(env_copy);
 	i = 0;
-	str = malloc(sizeof(char *) * (1000));
+	str = NULL;
+	size = 0;
+	size = size_of_env(env_copy);
+	// size = 100;
+	str = malloc(sizeof(char *) * (size + 2));
 	while (env_copy[i])
 	{
-		str[i] = malloc(sizeof(char) * (ft_strlen(env_copy[i]) + 1));
-		ft_strcpy(str[i], env_copy[i]);
+		 str[i] = malloc(sizeof(char) * (ft_strlen(env_copy[i]) + 1));
+		str[i] = ft_strcpy(str[i], env_copy[i]);
 		i++;
 	}
 	str[i] = NULL;

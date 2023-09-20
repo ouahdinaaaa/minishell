@@ -14,12 +14,15 @@
 
 int	cmd_pwd(void)
 {
-	char	pwd[2024];
+	char	*pwd = NULL;
 
-	if (getcwd(pwd, sizeof(pwd)))
+	pwd = getcwd(NULL, 0);
+	if (pwd)
 		printf("👣 %s\n", pwd);
 	else
-		printf(RED"Error of pwd\n"RESET);
+		printf(RED"pwd: error retrieving current directory: getcwd: cannot access parent directories: No such file or directory\n"RESET);
+	if (pwd)
+		free(pwd);
 	return (1);
 }
 
@@ -27,7 +30,7 @@ char	*get_directory(char *pwd)
 {
 	char	*str;
 	int		len;
-	int		i; 
+	int		i;
 
 	i = ft_strlen(pwd);
 	while (i > 0)
@@ -52,18 +55,25 @@ char	*get_directory(char *pwd)
 	return (str);
 }
 
-char	*print_directory(void)
+char	*print_directory(char **new_env, char *pwd)
 {
-	char	*directory; 
-	char	pwd[2024];
-	char	*result;
-	char	*fin;
+	(void)new_env;
+	char	*directory = NULL;
+	char	*pwd2 = NULL;
+	char	*fin =  NULL;
 
-	getcwd(pwd, sizeof(pwd));
-	directory = get_directory(pwd);
-	fin = ft_strjoin(("\033[35m⚜️  "), directory);
-	free(directory);
-	result = ft_strjoin(fin, RESET);
-	free(fin);
-	return (result);
+	pwd2 = getcwd(NULL, 0);
+	if (pwd2)
+	{
+		directory = get_directory(pwd2);
+		//dprintf(2, "str : [%s]\n", directory);
+		fin = add_write_str(("\033[35m⚜️  "), directory, "\033[1;97m", "");
+		free(directory);
+		free(pwd);
+		free(pwd2);
+		//dprintf(2, "prompt ; [%s]\n", fin);
+		return (fin);
+	}
+	return (pwd);
 }
+

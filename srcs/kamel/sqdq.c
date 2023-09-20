@@ -3,16 +3,16 @@
 /*                                                        :::      ::::::::   */
 /*   sqdq.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ayael-ou <ayael-ou@student.42.fr>          +#+  +:+       +#+        */
+/*   By: kbouzegh <kbouzegh@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/29 19:33:07 by kbouzegh          #+#    #+#             */
-/*   Updated: 2023/09/06 17:21:30 by ayael-ou         ###   ########.fr       */
+/*   Updated: 2023/09/18 16:35:11 by kbouzegh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "minishell.h"
+#include "../../includes/minishell.h"
 
-int countWords(char *str)
+int ft_countwords(char *str)
 {
     size_t i;
     int w;
@@ -32,7 +32,7 @@ int countWords(char *str)
     t = ft_strlen(str);
     tab = malloc(sizeof(int) * 3);
     remplirTableauDeZeros(tab, 3);
-    while (str[i] && i < t)
+    while (i < t)
     {
         while (str[i] && (str[i] == ' ') && tab[0] == 0 && i < t)
             i++;
@@ -98,18 +98,18 @@ int countWords(char *str)
 
 int *allocWords(char *str)
 {
-    int i;
+    size_t i;
     int w;
     int *alloc;
     int *tab;
 
     i = 0;
     w = 0;
-    alloc = malloc(sizeof(int) * countWords(str));
-    remplirTableauDeZeros(alloc, countWords(str));
+    alloc = malloc(sizeof(int) * ft_countwords(str));
+    remplirTableauDeZeros(alloc, ft_countwords(str));
     tab = malloc(sizeof(int) * 4);
     remplirTableauDeZeros(tab, 4);
-    while (str[i])
+    while (i < ft_strlen(str))
     {
         while (str[i] && (str[i] == ' ') && tab[3] == 0)
             i++;
@@ -200,6 +200,7 @@ int *allocWords(char *str)
             }
         }
     }
+    free(tab);
     return (alloc);
 }
 
@@ -216,14 +217,14 @@ char **words(char *str)
     j = 0;
     w = 0;
     alloc = allocWords(str);
-    words = malloc(sizeof(char *) * countWords(str));
-    while (i < countWords(str))
+    words = malloc(sizeof(char *) * (ft_countwords(str) + 1));
+    while (i < ft_countwords(str))
     {
         words[i] = malloc(sizeof(char) * alloc[i] + 1);
         i++;
     }
     i = 0;
-    remplirTableauDeZeros(alloc, countWords(str));
+    remplirTableauDeZeros(alloc, ft_countwords(str));
     tab = malloc(sizeof(int) * 4);
     remplirTableauDeZeros(tab, 4);
     while (str[i])
@@ -334,7 +335,8 @@ char **words(char *str)
     }
     words[w - 1][j] = '\0';
     words[w] = NULL;
-    free (alloc);
+
+    free(alloc);
     free (tab);
     int k = 0;
     while (words[k])

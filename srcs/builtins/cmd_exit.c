@@ -24,7 +24,7 @@ int	verif_str(char *str)
 	return (0);
 }
 
-int verif_is_num(char *str)
+int	verif_is_num(char *str)
 {
 	int	i;
 
@@ -39,40 +39,49 @@ int verif_is_num(char *str)
 	return (0);
 }
 
+void	new_condition(char *str1, char *str2, char **arg, t_pipex *pipex)
+{
+	int	nb;
+	int	num;
+
+	nb = 0;
+	if (arg[1])
+		num = verif_is_num(arg[1]);
+	if (str2 && !num)
+		write(STDERR_FILENO, "exit : too many arguments\n", 27);
+	else if (str1 && !str2)
+	{
+		nb = ft_atoi(str1) % 256;
+		write(STDERR_FILENO, "exit\n", 6);
+		free_pipex(pipex);
+		free_char_double(arg);
+		exit(nb);
+	}
+}
+
 void	situation_one(t_pipex *pipex, char *str)
 {
-	char	**arg;
-	int	num;
-	int nb;
+	int		num;
 	char	*str2;
+	char	**arg;
 
-	(void)nb;
 	num = 0;
 	if (!verif_str(str) && pipex[0].size == 1)
 		exit(0);
 	arg = ft_split(str, ' ');
 	if (arg[1])
 		num = verif_is_num(arg[1]);
-	if (num)
+	if (num && arg[1])
 	{
-		str2 = ft_strjoin("minishell : exit : ", arg[1]);
-		str2 = ft_strjoin_gnl(str2, " : numeric argument required\n");
-		ft_putstr_fd(str2 , 2);
+		str2 = add_write_str("minishell : exit : ", arg[1],
+				" : numeric argument required\n", "");
+		write(STDERR_FILENO, str2, ft_strlen(str2));
 		free(str2);
 		free_pipex(pipex);
 		free_char_double(arg);
 		exit(2);
 	}
-	else if (arg[2] && !num)
-		ft_putstr_fd("exit \nexit : too many arguments\n", 2);
-	else if (arg[1] && !arg[2])
-	{
-		nb = ft_atoi(arg[1]) % 256;
-		ft_putstr_fd("exit\n", 2);
-		free_pipex(pipex);
-		free_char_double(arg);
-		exit(nb);
-	}
+	new_condition(arg[1], arg[2], arg, pipex);
 	free_char_double(arg);
 }
 

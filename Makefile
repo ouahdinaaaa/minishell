@@ -22,6 +22,10 @@ LDFLAGS     = -L./libft -lft -lreadline
 RM          = rm -f
 SMAKE       = make --no-print-directory
 
+ANIMATION = "|/-\\"
+ANIMATION_DELAY = 0.1
+
+
 # Colors
 END         = \033[0m
 BOLD        = \033[1m
@@ -37,20 +41,26 @@ SRC_FILES   = minishell \
 				./utils/utils_parse \
 				./signal/signo \
 				./exec/here_doc \
+				./exec/here_doc2 \
 				./exec/path_bonus \
 				./exec/child_bonus \
 				./exec/files_bonus \
 				./exec/pipex_bonus \
 				./exec/replace_cmd \
 				./exec/redirection \
+				./exec/form_replace2 \
 				./exec/form_replace \
 				./exec/utils_form \
+				./exec/end_function \
 				./exec/replace_dollars_here_doc \
 				./exec/fonction_write \
 				./exec/utils_of_replace \
-				./exec/get_next_line \
+				./exec/utils_form_replace \
+				./exec/utils-forms2\
+				./exec/utils3\
 				./builtins/builtins\
 				./builtins/utils\
+				./builtins/utils2\
 				./builtins/cmd_cd\
 				./builtins/cmd_pwd\
 				./builtins/cmd_env\
@@ -58,23 +68,11 @@ SRC_FILES   = minishell \
 				./builtins/cmd_echo\
 				./builtins/cmd_unset\
 				./builtins/cmd_export\
-				./builtins/export_fake_env\
 				./builtins/export\
 				./kamel/initfree\
                 ./kamel/parsing\
-                ./kamel/parseCommand\
-                ./kamel/parseInfile\
-                ./kamel/parseInfileHeredoc\
-                ./kamel/parseOutfile\
-                ./kamel/parseOutfileAppend\
                 ./kamel/builtins\
-                ./kamel/builtinsUnset\
-                ./kamel/builtinsPwd\
-                ./kamel/builtinsExport\
-                ./kamel/builtinsExit\
-                ./kamel/builtinsEnv\
-                ./kamel/builtinsEcho\
-                ./kamel/builtinsCd\
+                ./kamel/builtins2\
                 ./kamel/sqdq\
                 ./kamel/sqdq-utils1\
                 ./kamel/sqdq-utils2\
@@ -83,10 +81,10 @@ SRC_FILES   = minishell \
                 ./kamel/utils2\
                 ./kamel/utils3\
                 ./kamel/utils4\
-                ./kamel/utils5\
                 ./kamel/utils6\
                 ./kamel/utils7\
-                ./kamel/utils8\
+				./kamel/zeParse\
+				
 
 SRC         = $(addprefix $(SRC_DIR), $(addsuffix .c, $(SRC_FILES)))
 OBJ         = $(patsubst $(SRC_DIR)%.c, $(OBJ_DIR)%.o, $(SRC))

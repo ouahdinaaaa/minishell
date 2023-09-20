@@ -12,69 +12,30 @@
 
 #include "./../../includes/minishell.h"
 
-int	choice_of_builtins(t_pipex *built, int i)
+int	choice_of_builtins(t_pipex *built, int i, int status)
 {
 	int	res;
 
 	res = 0;
 	if (built[i].cd == 1 && built[i].size == 1)
-		res = cmd_cd(built[i].path);
-        else if (built[i].cd == 2)
-                ft_putstr_fd("cd: too many arguments\n", 2);
+		res = cmd_cd(built[i].path, built[i].env);
+	else if (built[i].cd == 2)
+		ft_putstr_fd("cd: too many arguments\n", 2);
 	else if (built[i].pwd)
 		res = cmd_pwd();
 	else if (built[i].exit)
 		res = cmd_exit(built, i);
 	else if (built[i].echo)
-		res = cmd_echo(built[i].str_path, built[i].echo_n);
+		res = cmd_echo(built[i].commande, built[i].echo_n, status, built);
 	else if (built[i].envi)
 		res = cmd_env(built[i].env);
 	else if (built[i].unset && built[0].size == 1)
 		res = cmd_unset(&built[i], built);
 	else if (built[i].export_cmd && (built[0].size == 1 || !built[i].str_path))
-                res = cmd_export(&built[i], built, i);
+		res = cmd_export(&built[i], built, i);
 	else if (built[i].cd == 1 || built[i].unset || built[i].export_cmd)
 		res = 1;
-	if (res && built[i].size != 1)
-		exit(0);
-        return (res);
+	//if (res && built[i].size != 1)
+	//	return (free_pipex(built), exit(0), res);
+	return (res);
 }
-
-/*
-        BUILTINS FAIT :
-        create tableau de builtin
-        tab[i] = nom de commande
-        tab[i][j] = argument à envoyer
-
-    - CD
-    - PWD
-    - EXIT pour le builtin exit, après avoir fait
-    mainte et mainte test exit avec | ne sert strictement à rien
-    donc peut-être que tout ceci sert à exit
-
-
-    pas sur de mes dires, mais on dirais que l'execution des
-    builtins se fait uniquement sans pipex ou peut-être le pwd
-*/
-
-/*
-        COMMANDE AVEC PIPE
-        -echo
-        - env
-        - export
-
-        COMMANDE UTILISATION SANS PIPE
-        - cd
-        - pwd (voir on peux utiliser avec pipe)
-        - unset
-
-*/
-
-/*
-        ///// Fonction perfect //////
-
-            - echo
-            - pwd
-            - cd
-            - echo -n
-*/

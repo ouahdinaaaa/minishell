@@ -6,7 +6,7 @@
 /*   By: ayael-ou <ayael-ou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/27 20:41:28 by ayael-ou          #+#    #+#             */
-/*   Updated: 2023/09/09 15:31:18 by ayael-ou         ###   ########.fr       */
+/*   Updated: 2023/09/20 18:12:33 by ayael-ou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,52 +27,64 @@ void	initdata(t_cmd *data, int nbcmd)
 		return ;
 }
 
-int	pipex_main(char **env, t_pipex *pipex, int status)
+int	pipex_main(char **env, t_pipex *pipex, int status, char *pwd)
 {
 	t_cmd	data;
 
 	if (!env || !*env || error_syntaxe(pipex))
 		return (pipex[0].erreur);
 	initdata(&data, pipex->size);
+	pipex[0].erreur = -1;
 	if (!data.pids)
 		return (free_dataa(&data), 1);
 	replace_every_struct(pipex, status);
-	status = second_pipex(data, pipex, env, status);
+	status = second_pipex(data, pipex, status, pwd);
 	return (status);
 }
 
-int	second_pipex(t_cmd data, t_pipex *pipex, char **env, int sta)
+void	create_here_child(t_pipex *pipex, int sta, t_cmd data, char *pwd)
 {
-	int	status;
+	int	*tab;
 
+	tab = malloc(sizeof(int) * 3);
+	tab[0] = sta;
+	tab[1] = 0;
+	tab[2] = 0;
+	while (tab[1] < pipex[0].size)
+	{
+		if (pipex[tab[1]].here_doc)
+		{
+			create_here_doc(pipex, &data, tab, pwd);
+			//waitpid(data.pids[data.i], &sta, 0);
+			//sta = WEXITSTATUS(sta);
+			//if (sta == 130)
+			//{
+			//	dprintf(2, "okkk in you\n");
+			//	unlink(pipex[data.i].files[0]);
+			//	close(pipex[0].erreur);
+			//	exit(sta);
+			//}
+		}
+		tab[1] += 1;
+	}
+	if (ctrl_c_signo != 125)
+		free(tab);
+}
+
+int	second_pipex(t_cmd data, t_pipex *pipex, int sta, char *pwd)
+{
 	data.i = 0;
-	status = 0;
-	int j = 0;
-	pipex[0].erreur = -1;
 	while (data.i < pipex[0].size)
 	{
 		if (pipex[0].size == 1 && (pipex[0].export_cmd
 				|| pipex[0].unset || pipex[0].cd || pipex[0].exit))
-			return (free(data.pids), choice_of_builtins(pipex, data.i));
+			return (free(data.pids), choice_of_builtins(pipex, 0, sta));
 		pipe(data.fd);
 		data.pids[data.i] = fork();
 		if (data.pids[data.i] == 0 && data.i == 0)
-		{
-			while (j < pipex[0].size)
-			{
-				// create_every_files(pipex[i].start_fd);
-				if (pipex[j].here_doc)
-				create_here_doc(pipex[j].files[0], pipex[j].delimiteur, pipex, sta);
-				waitpid(data.pids[data.i], &status, 0);
-				status = WEXITSTATUS(status);
-				// dprintf(2, "erreur pipex : [%d]\n", pipex[0].erreur);
-				if (status == 130)
-					return (unlink(pipex[data.i].files[0]), close(pipex[0].erreur), status);
-				j++;
-			}
-		}
+			create_here_child(pipex, sta, data, pwd);
 		if (data.pids[data.i] == 0)
-			child_process(data, env, pipex);
+			child_process(data, pipex, sta, pwd);
 		else
 		{
 			close(data.fd[1]);
@@ -82,6 +94,6 @@ int	second_pipex(t_cmd data, t_pipex *pipex, char **env, int sta)
 		}
 		data.i++;
 	}
-	status = end_function(data, pipex);
-	return (close(data.fd[0]), status);
+	sta = end_function(data, pipex);
+	return (close(data.fd[0]), sta);
 }

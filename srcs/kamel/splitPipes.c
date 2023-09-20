@@ -3,36 +3,23 @@
 /*                                                        :::      ::::::::   */
 /*   splitPipes.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ayael-ou <ayael-ou@student.42.fr>          +#+  +:+       +#+        */
+/*   By: kbouzegh <kbouzegh@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/29 19:33:07 by kbouzegh          #+#    #+#             */
-/*   Updated: 2023/09/08 12:12:40 by ayael-ou         ###   ########.fr       */
+/*   Updated: 2023/09/18 16:34:51 by kbouzegh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "minishell.h"
+#include "../../includes/minishell.h"
 
-char	*word_dup(const char *str, int start, int finish)
+int	ft_count_pipes(char *s)
 {
-	char	*word;
-	int		i;
-
-	i = 0;
-	word = malloc((finish - start + 1) * sizeof(char));
-	while (start < finish)
-		word[i++] = str[start++];
-	word[i] = '\0';
-	return (word);
-}
-
-int	countPipes(char *s)
-{
-	int	i;
+	size_t	i;
 	int	nb_pipes;
 
 	nb_pipes = 0;
 	i = 0;
-	while (s[i])
+	while (i < ft_strlen(s))
 	{
 		if (s[i] == '|')
 			nb_pipes++;
@@ -52,7 +39,7 @@ int	countPipes(char *s)
 		else if (s[i] == '\'')
 		{
 			i++;
-			while (s[i] != '\'')
+			while (s[i] && s[i] != '\'')
 				i++;
 			if (s[i] && s[i] != ' ')
 			{
@@ -73,9 +60,7 @@ char    **splitPipes(char *s)
 	int		index;
 	char	**split;
 
-	// printf("\nChaine de caractères : %s\n", s);
-	split = malloc((countPipes(s) + 1) * sizeof(char *));
-    // printf("\nNombre de pipes : %d\n", countPipes(s));
+	split = malloc((ft_count_pipes(s) + 2) * sizeof(char *));
     if (!s || !(split))
 		return (0);
     i = 0;
@@ -85,10 +70,10 @@ char    **splitPipes(char *s)
 	{
 		if (s[i] == '"')
 			while(s[++i] && s[i] != '"')
-				i = i;
+				i = i + 1 - 1;
 		else if (s[i] == '\'')
 			while(s[++i] && s[i] != '\'')
-				i = i;
+				i = i + 1 - 1;
 		else if (s[i] == '|')
 		{
 			split[j++] = word_dup(s, index, i);
@@ -98,7 +83,5 @@ char    **splitPipes(char *s)
 	}
 	split[j++] = word_dup(s, index, i);
 	split[j] = NULL;
-    // printf("\n\npipe[0] : [%s]\n", split[0]);
-    // printf("pipe[1] : [%s]\n", split[1]);
 	return (split);
 }

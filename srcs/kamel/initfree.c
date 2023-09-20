@@ -6,11 +6,11 @@
 /*   By: ayael-ou <ayael-ou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/01 00:00:00 by kbouzegh          #+#    #+#             */
-/*   Updated: 2023/09/09 22:11:01 by ayael-ou         ###   ########.fr       */
+/*   Updated: 2023/09/20 13:48:43 by ayael-ou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "minishell.h"
+#include "../../includes/minishell.h"
 
 t_pipex	*init_pipex(int parts, char **env)
 {
@@ -18,7 +18,7 @@ t_pipex	*init_pipex(int parts, char **env)
 	t_pipex	*pipex;
 
 	i = 0;
-	pipex = malloc(sizeof(t_pipex) * parts);
+	pipex = malloc(sizeof(t_pipex) * parts + 1);
 	if (pipex == NULL)
 		return (NULL);
 	while (i < parts)
@@ -26,26 +26,42 @@ t_pipex	*init_pipex(int parts, char **env)
 		bzero_pipex(i, pipex);
 		pipex[i].files[0] = NULL;
 		pipex[i].files[1] = NULL;
+		pipex[i].outfiles = NULL;
+		pipex[i].infiles = NULL;
 		pipex[i].cmd = NULL;
 		pipex[i].delimiteur = NULL;
-		write_env(&pipex[i], env);
+		pipex[i].env = ft_strcpy_double(env);
 		pipex[i].path = NULL;
 		pipex[i].size = parts;
 		pipex[i].str_path = NULL;
+		pipex[i].commande = NULL;
 		i++;
 	}
 	return (pipex);
 }
 
-void    write_env(t_pipex *pipex, char **env)
+// void	ft_write_env(t_pipex *pipex, char **env)
+// {
+//	 pipex->env = ft_strcpy_double(env);
+// 	return ;
+// }
+
+void	free_pipex_infiles_outfiles_env(t_pipex *pipex, int i)
 {
-    pipex->env = ft_strcpy_double(env);
-    return ;
+	if (pipex[i].env)
+		free_char_double(pipex[i].env);
+	if (pipex[i].nbinfiles > 0)
+		free_char_double(pipex[i].infiles);
+	if (pipex[i].nboutfiles > 0)
+		free_char_double(pipex[i].outfiles);
+	if (pipex[i].commande)
+		free(pipex[i].commande);
 }
 
 void	free_pipex(t_pipex *pipex)
 {
 	int	i;
+
 	i = 0;
 	while (i < pipex[0].size)
 	{
@@ -65,38 +81,33 @@ void	free_pipex(t_pipex *pipex)
 			free(pipex[i].str_path);
 		if (pipex[i].fake_env)
 			free_char_double(pipex[i].fake_env);
-		if (pipex[i].env)
-			free_char_double(pipex[i].env);
+		free_pipex_infiles_outfiles_env(pipex, i);
 		i++;
 	}
 	free(pipex);
 }
 
-void	free_char_double(char **array)
+void	bzero_pipex(int i, t_pipex *pipex)
 {
-	int	i;
-
-	i = 0;
-	if (array == NULL)
-		return ;
-	while (array[i] != NULL)
-	{
-		free(array[i]);
-		array[i] = NULL;
-		i++;
-	}
-	free(array);
-}
-
-void	free_double(char **tab)
-{
-	int	i;
-
-	i = 0;
-	while (tab[i])
-	{
-		free(tab[i]);
-		i++;
-	}
-	free(tab);
+	pipex[i].in = 0;
+	pipex[i].out = 0;
+	pipex[i].append = 0;
+	pipex[i].size = 0;
+	pipex[i].here_doc = 0;
+	pipex[i].export_cmd = 0;
+	pipex[i].pwd = 0;
+	pipex[i].cd = 0;
+	pipex[i].exit = 0;
+	pipex[i].echo = 0;
+	pipex[i].echo_n = 0;
+	pipex[i].envi = 0;
+	pipex[i].unset = 0;
+	pipex[i].index_char = 0;
+	pipex[i].erreur = 0;
+	pipex[i].sq = 0;
+	pipex[i].dq = 0;
+	pipex[i].aya = 0;
+	pipex[i].indexmot = 0;
+	pipex[i].nbinfiles = 0;
+	pipex[i].nboutfiles = 0;
 }

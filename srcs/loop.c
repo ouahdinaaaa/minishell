@@ -6,11 +6,24 @@
 /*   By: ayael-ou <ayael-ou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/29 19:33:07 by kbouzegh          #+#    #+#             */
-/*   Updated: 2023/09/10 04:54:13 by ayael-ou         ###   ########.fr       */
+/*   Updated: 2023/09/20 17:58:02 by ayael-ou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/minishell.h"
+
+char	**copy_my_env(void)
+{
+	char	*path = NULL;
+	char	**new_env;
+
+	path = getcwd(NULL, 0);
+	new_env = malloc(sizeof(char *) * 2);
+	new_env[0] = malloc(sizeof(char) * (ft_strlen(path) + ft_strlen("OLDPWD=") + 2));
+	new_env[0] = ft_strjoin("OLDPWD=", path);
+	new_env[1] = NULL;
+	return (new_env);
+}
 
 void	loop(char **env)
 {
@@ -19,79 +32,82 @@ void	loop(char **env)
 	char	**new_env;
 	int		status;
 	char	**export;
-	char	*pwd;
+	char	*pwd = NULL;
 
 	commande = NULL;
-	(void)status;
-	new_env = ft_strcpy_double(env);
-	export = export_fake_env(env);
-	signal(SIGQUIT, signal_ctrl_slash);
+	status = 0;
+	if (!env || !*env)
+		new_env = copy_my_env();
+	else
+		new_env = ft_strcpy_double(env);
+	export = export_fake_env(new_env);
+	// signal(SIGQUIT, signal_ctrl_slash);
+	signal(SIGQUIT, SIG_IGN);
 	signal(SIGINT, signal_ctrl_c);
 	while (1)
 	{
-		pwd = print_directory();
+		pwd = print_directory(new_env, pwd);
 		commande = readline(pwd);
 		if (commande == NULL)
 		{
-			free(pwd);
-			free(commande);
 			free_char_double(new_env);
+			free_char_double(export);
+			free(commande);
+			free(pwd);
 			signal_ctrl_d();
 		}
 		if (commande != NULL && *commande)
 		{
 			if (ctrl_c_signo == 130)
+			{
 				status = 130;
+				dprintf(2, "exit in here\n");
+				//unlink(pipex[data.i].files[0]);
+				//close(pipex[0].erreur);
+				//exit(sta);
+			}
 			signal(SIGINT, SIG_IGN);
-			ft_putstr_fd(BLUE, 2);
+			ft_putstr_fd(SAPIN, 2);
 			add_history(commande);
-			pipex = init_pipex((countPipes(commande) + 1), new_env);
+			pipex = init_pipex((ft_count_pipes(commande) + 1), new_env);
 			parsing(commande, pipex, pipex[0].env);
+			display_pipex(pipex, (pipex[0].size));
 			free_char_double(new_env);
 			init_fake_env(pipex, export);
-			displayPipexEssential(pipex, (pipex[0].size));
-			status = pipex_main(pipex[0].env, pipex, status);
+			free_char_double(export);
+			init_cmd(pipex, commande);
+			status = pipex_main(pipex[0].env, pipex, status, pwd);
 			new_env = ft_strcpy_double(pipex[0].env);
+			export = export_fake_env(new_env);
 			free_pipex(pipex);
 			ft_putstr_fd(RESET, 2);
 			ctrl_c_signo = 0;
 		}
-		free(pwd);
 		free(commande);
 		signal(SIGINT, signal_ctrl_c);
 	}
 }
 
-/*
-	utilise ce main avec valgrind --leak-checl=full ./minishell avec une commande
-	Quand taura aucun leaks ni rien aucune erreur utilise le dans minishell et voyons si ya tjrs prblm
-*/
+// displayPipexEssential(pipex, (pipex[0].size));
 
 /*
-	Update de ce que jai fait !
-
-	** Heredoc si "limiter" on remplace pas le dollard
-	** sinon si limiter on remplace le dollard
-	si Ctrl+C fait dans minishell valeur de retour = 130
-	Expand bien regler mtn le dollard il est bien remaplce et bonne valeur ajouté (skip les caractere speciaux)
-	
+	**echo quand on a un chevrons retirer les simple auote du mot debut\fin + guilleme debut fin si ya
 */
 
+/***				REverifer
+..............................
 
-/*
-		UPdate de ce qu'il me reste à faire
+revoir le test echo 'he"lo' retire aussi la double quuotte voir pourquoi
+voir prblm avec echo si
 
-	** Leaks de zinzin avec unset 
-	** verifier mon execcution a part avec valgrind --leak-check=full ./minishell
-	+ verifier track fds que tout mes fd soit bien fermé.
-
-	** Faire la norminette.
-	** Retirer tout mes Dprintf voir si mettre que smiley et couleur uni [REGLER CE BIG SOUCIS]
-	** Regler soucis dans $ si $****USER important  [fait]
-	** Regler soucis $$ [fait]
-	** REvoir le soucis du replace $ bien bien teste
-	** courte replace
-
-
-	PS : ON A LE MINISHELL LE PLUS JOLIE DE L'ECOLE
-*/
+renouvllement de mon fake export
+***retire simple quote plus double quote
+touch avec guillemets vide seegfault sur parsing
+oublie des message erreur pour << et >> qund + 1chevron
+..................................
+*///proteger write + malloc + retour de fonction
+// parsing pensee au echo -n -n -n -n
+// ---> retirer tout les -n qui suivent echo peut importe espace
+// valgrind --leak-check=full --show-leak-kinds=all --track-fds=yes --suppressions=valgrind.txt ./minishell
+// changer regler vraiment
+// garbage collector ---> derniere necessite

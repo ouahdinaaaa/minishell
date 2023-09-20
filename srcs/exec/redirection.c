@@ -45,22 +45,29 @@ void	is_child(t_cmd *data, const int index, t_pipex *pipex)
 	close(data->fd[1]);
 }
 
-void	child_process(t_cmd data, char **env, t_pipex *pipex)
+void	child_process(t_cmd data, t_pipex *pipex, int status, char *pwd)
 {
 	char	**str;
 
 	is_child(&data, data.i, pipex);
-	if (choice_of_builtins(pipex, data.i))
+	if (choice_of_builtins(pipex, data.i, status))
+	{
+		free(data.pids);
+		free_pipex(pipex);
+		free(pwd);
+		//if (data.i == (pipex[0].seize - 1))
+			//close(data.prev_pipe);
 		exit(0);
+	}
 	str = ft_split(pipex[data.i].cmd, ' ');
 	if (ft_strchr(str[0], '/'))
 	{
 		free_char_double(str);
-		exec_cmd(&pipex[data.i], data, env, 1);
+		exec_cmd(&pipex[data.i], data, pwd, 1);
 	}
 	else
 	{
 		free_char_double(str);
-		exec_cmd(&pipex[data.i], data, env, 0);
+		exec_cmd(&pipex[data.i], data, pwd, 0);
 	}
 }

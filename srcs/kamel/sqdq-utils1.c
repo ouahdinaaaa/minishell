@@ -1,114 +1,100 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   builtins.c                                         :+:      :+:    :+:   */
+/*   sqdq-utils1.c                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ayael-ou <ayael-ou@student.42.fr>          +#+  +:+       +#+        */
+/*   By: kbouzegh <kbouzegh@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/29 19:33:07 by kbouzegh          #+#    #+#             */
-/*   Updated: 2023/07/13 18:17:08 by ayael-ou         ###   ########.fr       */
+/*   Updated: 2023/09/18 16:34:55 by kbouzegh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "minishell.h"
+#include "../../includes/minishell.h"
 
-int countDollars(char *str)
+void    init_tab_ping_dollars(int *tab, int zero)
 {
-    int nb;
-    int i;
-
-    nb = 0;
-    i = 0;
-    while (str[i] && str[i] != '\0')
-    {
-        if (str[i] == '$')
-            nb++;
-        i++;
-    }
-    return (nb);
+    tab[0] = zero;
+    tab[1] = 0;
+    tab[2] = 0;
+    tab[3] = 0;
 }
 
-char *convertirDollarEnEuro(char *str)
-{
-    int taille;
-    int sq;
-    char    *resultat;
-    int i;
-    int j;
+// tab[0] taille
+// tab[1] sq
+// tab[2] i
+// tab[3] j
 
-    if (str == NULL)
-        return (NULL);
-    i = 0;
-    j = 0;
-    sq = 0;
-    taille = ft_strlen(str);
-    resultat = (char *)malloc((taille + 1 + countDollars(str)) * sizeof(char));
-    while (str[i])
-    {
-        if (str[i] == '\'')
-        {
-            resultat[j++] = str[i];
-            sq++;
-        }
-        else if (str[i] == '$')
-        {
-            if (str[i + 1] && (sq % 2 == 0))
-            {
-                resultat[j++] = '$';
-                resultat[j++] = '*';
-            }
-            else
-                resultat[j++] = '$';
-        }
-        else
-            resultat[j++] = str[i];
-        i++;
-    }
-    resultat[j] = '\0';
-    return (resultat);
+char	*convertirDollarEnEuro(char *str)
+{
+	char	*resultat;
+    int     tab[4];
+
+    tab[0] = ft_strlen(str);
+    tab[1] = 0;
+    tab[2] = 0;
+    tab[3] = 0;
+	if (str == NULL)
+		return (NULL);
+	resultat = (char *)malloc((size_t)tab[0] + 1 + (size_t)ft_count_dollars(str));
+	while (str[tab[2]])
+	{
+		if (str[tab[2]] == '\'')
+		{
+			resultat[tab[3]++] = str[tab[2]];
+			tab[1]++;
+		}
+		else if (str[tab[2]] == '$')
+		{
+			if (str[tab[2] + 1] && (tab[1] % 2 == 0))
+			{
+				resultat[tab[3]++] = '$';
+				resultat[tab[3]++] = '*';
+			}
+			else
+				resultat[tab[3]++] = '$';
+		}
+		else
+			resultat[tab[3]++] = str[tab[2]];
+		tab[2]++;
+	}
+	resultat[tab[3]] = '\0';
+	return (resultat);
 }
 
-void remplirTableauDeZeros(int *tableau, int taille)
+void	remplirTableauDeZeros(int *tableau, int taille)
 {
-    int i;
+	int	i;
 
-    i = 0;    
-    while (i < taille)
-    {
-        tableau[i] = 0;
-        i++;
-    }
+	i = 0;
+	while (i < taille)
+	{
+		tableau[i] = 0;
+		i++;
+	}
 }
 
-int isThereChar(char *str, char c)
+int	isThereChar(char *str, char c)
 {
-    int i;
+	int	i;
 
-    i = 0;
-    while (str[i])
-    {
-        if (str[i] == c)
-        {
-            return (1);
-        }
-        i++;
-    }
-    return (0);
+	i = 0;
+	while (str[i])
+	{
+		if (str[i] == c)
+		{
+			return (1);
+		}
+		i++;
+	}
+	return (0);
 }
 
-char *ft_strcat(char *dest, const char *src)
+void	swapPointers(char *ptr1, char *ptr2)
 {
-    char *temp;
-    
-    temp = dest;
-    while (*temp != '\0')
-        temp++;
-    while (*src != '\0')
-    {
-        *temp = *src;
-        temp++;
-        src++;
-    }
-    *temp = '\0';
-    return (dest);
+	char	*temp;
+
+	temp = ptr1;
+	ptr1 = ptr2;
+	ptr2 = temp;
 }

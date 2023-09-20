@@ -3,68 +3,79 @@
 /*                                                        :::      ::::::::   */
 /*   builtins.c                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ayael-ou <ayael-ou@student.42.fr>          +#+  +:+       +#+        */
+/*   By: kbouzegh <kbouzegh@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/29 19:33:07 by kbouzegh          #+#    #+#             */
-/*   Updated: 2023/07/13 18:17:08 by ayael-ou         ###   ########.fr       */
+/*   Updated: 2023/09/18 18:21:57 by kbouzegh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "minishell.h"
+#include "../../includes/minishell.h"
 
-void	checkBuiltins(t_pipex *pipex, int ip)
+void	checkBuiltins(t_pipex *pipex, int ip, char **motscmd)
 {
-	char	*cmd;
-	int		*tab;
+	int	*tab;
 
 	tab = malloc(sizeof(int) * 2);
 	tab[0] = 0;
 	tab[1] = ip;
-	cmd = strcpySpecial(pipex[ip].cmd, ' ', pipex, tab);
-	if (ft_strncp(cmd, "export") == 0 || ft_strncp(cmd, "\"export\"") == 0)
-		checkExport(pipex, ip);
-	else if (ft_strncp(cmd, "pwd") == 0 || ft_strncp(cmd, "\"pwd\"") == 0)
-		checkPwd(pipex, ip);
-	else if (ft_strncp(cmd, "echo") == 0 || ft_strncp(cmd, "\"echo\"") == 0)
-		checkEcho(pipex, ip);
-	else if (ft_strncp(cmd, "cd") == 0 || ft_strncp(cmd, "\"cd\"") == 0)
-		checkCd(pipex, ip);
-	else if (ft_strncp(cmd, "exit") == 0 || ft_strncp(cmd, "\"exit\"") == 0)
-		checkExit(pipex, ip);
-	else if (ft_strncp(cmd, "unset") == 0 || ft_strncp(cmd, "\"unset\"") == 0)
-		checkUnset(pipex, ip);
-	else if (ft_strncp(cmd, "env") == 0 || ft_strncp(cmd, "\"env\"") == 0)
+	if (ft_strncp(motscmd[0], "export") == 0)
+		checkExport(pipex, ip, motscmd);
+	else if (ft_strncp(motscmd[0], "pwd") == 0)
+		checkPwd(pipex, ip, motscmd);
+	else if (ft_strncp(motscmd[0], "echo") == 0)
+		checkEcho(pipex, ip, motscmd);
+	else if (ft_strncp(motscmd[0], "cd") == 0)
+		checkCd(pipex, ip, motscmd);
+	else if (ft_strncp(motscmd[0], "exit") == 0)
+		check_exit(pipex, ip, motscmd);
+	else if (ft_strncp(motscmd[0], "unset") == 0)
+		checkUnset(pipex, ip, motscmd);
+	else if (ft_strncp(motscmd[0], "env") == 0)
 		checkEnv(pipex, ip);
 	free(tab);
-	free(cmd);
 }
 
-void	spaceManagement(t_pipex *pipex, int ip)
+void	checkCd(t_pipex *pipex, int ip, char **cmd)
 {
-	if (onlySpaces(pipex[ip].str_path) == 1)
-	{
-		free(pipex[ip].str_path);
-		pipex[ip].str_path = NULL;
-	}
-	if (onlySpaces(pipex[ip].path) == 1)
-	{
-		free(pipex[ip].path);
-		pipex[ip].path = NULL;
-	}
+	pipex[ip].cd = 1;
+	if (cmd[1])
+		pipex[ip].path = ft_strdup(cmd[1]);
+	if (ft_countwords(pipex[ip].cmd) > 2)
+		pipex[ip].cd = 2;
 }
 
-int	onlySpaces(char *str)
+void	checkEcho(t_pipex *pipex, int ip, char **cmd)
 {
 	int	i;
 
 	i = 0;
-	if (!str)
-		return (1);
-	while (str[i])
+	if (cmd[i + 1] && ft_strncp(cmd[i + 1], "-n") == 0)
 	{
-		if (str[i] != ' ' && str[i] != '\t')
-			return (0);
-		i++;
+		i = i + 2;
+		pipex[ip].echo_n = 1;
+		while (cmd[i] != NULL)
+			pipex[ip].str_path = concatwithspace(pipex[ip].str_path, cmd[i++]);
 	}
-	return (1);
+	else
+	{
+		i = 1;
+		pipex[ip].echo = 1;
+		while (cmd[i] != NULL)
+			pipex[ip].str_path = concatwithspace(pipex[ip].str_path, cmd[i++]);
+	}
+}
+
+void	checkEnv(t_pipex *pipex, int ip)
+{
+	pipex[ip].envi = 1;
+}
+
+void	check_exit(t_pipex *pipex, int ip, char **cmd)
+{
+	(void)cmd;
+	if (ft_countwords(pipex[ip].cmd) > 2)
+		pipex[ip].exit = 2;
+	else
+		pipex[ip].exit = 1;
 }
